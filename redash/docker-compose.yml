@@ -1,0 +1,53 @@
+version: "3.7"
+
+x-redash: &redash
+  image: redash/redash
+  depends_on:
+    - redis
+    - postgres
+    - email
+  environment:
+    REDASH_REDIS_URL: "redis://redis:6379/0"
+    REDASH_DATABASE_URL: "postgresql://postgres@postgres:5432/postgres"
+    REDASH_MAIL_DEFAULT_SENDER: "redash@example.com"
+    REDASH_MAIL_SERVER: "email"
+services:
+
+  server:
+    <<: *redash
+    container_name: server
+    command: server
+    ports:
+      - "5000:5000"
+      - "5678:5678"
+
+  scheduler:
+    <<: *redash
+    container_name: scheduler
+    command: scheduler
+    depends_on:
+      - server
+
+  worker:
+    <<: *redash
+    container_name: worker
+    command: worker
+    depends_on:
+      - server
+
+  redis:
+    container_name: redis
+    image: redis
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    command: "postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=OFF"
+    environment: 
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  email:
+    container_name: email
+    image: maildev/maildev
+    ports:
+      - "1080:80"
