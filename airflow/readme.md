@@ -26,6 +26,8 @@ _default sql_alchemy_conn (SQLite) is commented_
 
 ## supervisord.conf ##
 
+__Path:__ /etc/supervisor/conf.d/supervisord.conf
+
 Starts both _airfow schedurler_ and _airflow server_ as daemons
 
 ## start&#46;sh ##
